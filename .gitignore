@@ -5,6 +5,6 @@
 *.swp
 *.pyc
 
-quick.txt
-low.txt
-high.txt
+out-quick.txt
+out-low.txt
+out-high.txt
