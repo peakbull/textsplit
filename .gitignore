@@ -1,0 +1,10 @@
+**/__pycache__
+
+.coverage
+
+*.swp
+*.pyc
+
+quick.txt
+low.txt
+high.txt
