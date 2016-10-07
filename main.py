@@ -8,9 +8,9 @@ FLAG_QUICK = "q@"
 FLAG_LOW = "l@"
 FLAG_HIGH = "h@"
 
-FILE_NAME_QUICK = "quick.txt"
-FILE_NAME_LOW = "low.txt"
-FILE_NAME_HIGH = "high.txt"
+FILE_NAME_QUICK = "out-quick.txt"
+FILE_NAME_LOW = "out-low.txt"
+FILE_NAME_HIGH = "out-high.txt"
 
 FLAG_NO_PROCESS = "#"
 

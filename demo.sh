@@ -1,5 +1,5 @@
 #!/bin/bash
 
 clear
-rm quick.txt low.txt high.txt
+rm out-quick.txt out-low.txt out-high.txt
 python3 main.py test-input.txt
