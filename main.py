@@ -5,10 +5,10 @@ import os
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-APP_NAME = "TextSplitOutput"
+APP_NAME = "TextSplit"
 APP_AUTHOR = "allen wong"
 APP_VERSION = "0.5 build(161008)"
-APP_LICENSE = "GPL"
+APP_LICENSE = "GPL 3.0"
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
