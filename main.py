@@ -7,7 +7,7 @@ import os
 
 APP_NAME = "TextSplit"
 APP_AUTHOR = "allen wong"
-APP_VERSION = "0.5 build(161008)"
+APP_VERSION = "1.0.0 build(161019)"
 APP_LICENSE = "GPL 3.0"
 
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -55,22 +55,25 @@ def readFromFile(fn):
 # return:
 #   "" = fail
 #   string flag = OK
-def findLineStrFlag(lineStr):
+def findLineStrFlag(lineStr, debug):
     if not checkStringBad(lineStr, ""):
         return ""
     lineFlag = ""
+    flagName = ""
     if lineStr.find( LIST_FLAG_QUICK[0] ) == 0:
-        print("find QUICK: " + lineStr)
+        flagName = "QUICK"
         lineFlag = LIST_FLAG_QUICK[0]
     elif lineStr.find( LIST_FLAG_LOW[0] ) == 0:
-        print("find LOW: " + lineStr)
+        flagName = "LOW"
         lineFlag = LIST_FLAG_LOW[0]
     elif lineStr.find( LIST_FLAG_HIGH[0] ) == 0:
-        print("find HIGH: " + lineStr)
+        flagName = "HIGH"
         lineFlag = LIST_FLAG_HIGH[0]
     elif lineStr.find( FLAG_NO_PROCESS ) == 0:
-        print("find no process: " + lineStr)
+        flagName = "no process"
         lineFlag = FLAG_NO_PROCESS
+    if debug and flagName != "":
+        print("find %s: %s" % (flagName, lineStr))
     return lineFlag
 
 def getFileNameFromFlag(flag):
@@ -86,7 +89,7 @@ def getFileNameFromFlag(flag):
         exit(1)
     return fn
 
-def storeToFlagFile(flag, lineStr):
+def storeToFlagFile(flag, lineStr, debug):
     fn = getFileNameFromFlag(flag)
     if fn == "":
         return
@@ -95,7 +98,8 @@ def storeToFlagFile(flag, lineStr):
     lineStr = lineStr[2:]        # 截取 2-N
     lineStr = lineStr.strip()    # 去掉前后空格
     appendToFile(fn, lineStr)
-    print("  ---> success write: " + lineStr)
+    if debug:
+        print("  ---> success write: " + lineStr)
 
 def appendToFile(fn, lineStr):
     ff = open(fn, 'a')      # append to file, 如 file 不存在, 则 create
@@ -117,24 +121,28 @@ def widthString(str, length):
         s += " "
     return s
 
-def processSplit(lineStr):
+def processSplit(lineStr, debug):
     if not checkStringBad(lineStr, ""):
         return ""
-    lineStr = lineStr.strip()    # 去掉前后空字符
-    lineFlag = findLineStrFlag(lineStr)
+    # line string 不去掉前后空格, 我们想 flag 必须在第一个 character 出现, 才是合法的
+    #lineStr = lineStr.strip()    # 去掉前后空字符
+    lineFlag = findLineStrFlag(lineStr, debug)
     if lineFlag == "":
-        print("unknow FLAG: " + lineStr)
+        if debug:
+            print("unknow FLAG: " + lineStr)
         return ""
     elif lineFlag == FLAG_NO_PROCESS:
         return ""
-    storeToFlagFile(lineFlag, lineStr)
+    storeToFlagFile(lineFlag, lineStr, debug)
     return lineFlag
 
 def processDiff(index, flag, lineStr):
     space = widthString(flag, 10)
     lineNum = widthString(str(index+1), 3)
-    s = "[ %s ] %s %s" % (space, lineNum, lineStr)
-    appendToFile(FILE_NAME_PROCESS, s)
+    #s = "[ %s ] %s %s" % (space, lineNum, lineStr)
+    if flag == "":  # 只输出没有处理的 line
+        s = lineStr
+        appendToFile(FILE_NAME_PROCESS, s)
 
 def printAppInfo():
     print("app name: " + APP_NAME)
@@ -143,27 +151,50 @@ def printAppInfo():
     print("license: " + APP_LICENSE)
     print("")
 
-# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-def main():
-    printAppInfo()
-    if len(sys.argv) < 2:
-        print("request arg 1 is input file name.")
-        print("can use 'test-input.txt'")
-        return
+def doArgs():
+    if len(sys.argv) < 3:
+        print("false, request args")
+        print("")
+        print("args:")
+        print("  1 = input file name")
+        print("  2 = 0 or 1, debug message off or open")
+        return False, "", False
     fn = sys.argv[1]
-    lines = readFromFile(fn)
-    if lines == '':
-        return False
-    if not lines:
-        return False
+    if sys.argv[2] == "0":
+        debug = False
+    else:
+        debug = True
+    return True, fn, debug
+
+def processLine(lines, debug):
+    pcline = 0
+    notpcline = 0
     for index, lineStr in enumerate(lines):
         newLineStr = lineStr
         # 去掉换行符, 否则 string 还会算有一个 character
         newLineStr = newLineStr.replace("\r\n", "")
         newLineStr = newLineStr.replace("\n", "")
-        flag = processSplit(newLineStr)
+        flag = processSplit(newLineStr, debug)
         processDiff(index, flag, newLineStr)
+        if flag == "":
+            notpcline+=1
+        else:
+            pcline+=1
+    print("process line: %d, not process line: %d" % (pcline, notpcline))
 
+# --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+def main():
+    printAppInfo()
+    ok, fn, debug = doArgs()
+    if not ok:
+        return
+    lines = readFromFile(fn)
+    if lines == '':
+        return False
+    if not lines:
+        return False
+    processLine(lines, debug)
+    
 # --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 main()
 
